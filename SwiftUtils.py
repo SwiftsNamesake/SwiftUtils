@@ -220,10 +220,23 @@ class BaseConverter:
 	''' Various implementations of base-2 to base-10 converters '''
 
 
-# Haskell-style list definitions with the Ellipsis
+# List utilities
 class HaskellList:
+	''' Haskell-style list definitions with the Ellipsis '''
 	def __init__(*args):
 		pass
+
+
+def shuffleString(word):
+	from random import shuffle
+	lst = list(word)
+	shuffle(lst)
+	return ''.join(lst)
+
+
+def shuffleWords(sentence):
+	return ' '.join(map(shuffleString, sentence.split(' ')))
+
 
 # Witchcraft
 @repeat(5)
@@ -275,6 +288,7 @@ def restrictInvocations(n):
 		return silencer
 	return wrapper
 
+
 def cache(func):
 	''' Creates cached version of pure functions (x -> y) '''
 	cache = {}
@@ -296,6 +310,28 @@ def nag():
 @cache
 def primes(n):
 	pass
+
+
+def vennCircles(centre : complex, size : complex, number : int, distance : int, show : bool = False, unit : str = 'pt'):
+	
+	''' Calculates top left coordinates for Venn circles (screen coordinates) '''
+	
+	from cmath import rect, pi as π
+
+	# TODO: Optional start angle
+
+	dAngle = int(360.0/number) 	# Angle delta (degrees)
+	corners = [ centre+size+rect(distance, angle*π/180.0) for angle in range(0, 360, dAngle)]	# List of Veen circle top left corner coordinates
+
+	if show:
+		print('\n\n'.join('top: %d%s;\nleft: %d%s;' % (corner.imag, unit, corner.real, unit)  for corner in corners))
+
+	return corners
+
+
+# Miscellaneous
+def choose(optional, default):
+		return optional if optional is not None else default
 
 
 # Code utilities

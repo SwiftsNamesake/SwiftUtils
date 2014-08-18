@@ -20,13 +20,17 @@
 import tkinter as tk
 
 from ctypes import *
-from itertools import cycle
+from itertools import cycle, takewhile
 
 from sys import stdout
 from time import sleep
 from random import choice
+from collections import namedtuple
 
-from WinTypes import * 	# (?)
+if __name__ == '__main__':
+	from WinTypes import *
+else:
+	from SwiftUtils.WinTypes import *	# (?) # TODO: Fix import error (different behaviour when including this module from another script) (✓)
 # from constants import * 	# (?)
 
 
@@ -57,7 +61,6 @@ class Console():
 	advanced text-based interaction.
 
 	'''
-
 
 	def __init__(self):
 
@@ -196,8 +199,75 @@ class Console():
 		self.putTokens(*tokens)
 
 
+	def parseMarkup(self, markup):
+
+		''' '''
+
+		# TODO: Parse markup
+		# TODO: Escapes for syntactic characters
+		# TODO: Default formatting for plain text
+		# TODO: Debugging, error handling
+		# TODO: Use regex or library (?)
+		# NOTE: Nested tags are currently not supported
+		
+		Token = namedtuple('Token', 'fg bg text')
+		tokens = []
+
+		def colour(prop, frmt):
+			if prop not in frmt:
+				return { 'fg': Colours.WHITE, 'bg': Colours.BLACK }[prop]
+			else:
+				# TODO: Use colour aliases when printing tokens (?)
+				return getattr(Colours, ''.join(takewhile(lambda c: c.isupper(), frmt[frmt.index(prop)+3:])))
+		
+
+		while len(markup) > 0:
+			print(len(markup))
+			print('Markup: \'%s\'' % markup)
+			if markup.startswith('<'):
+				begin 	= markup.index('<') # Should always be 0 within this branch
+				end 	= markup.index('>') # Last index of formatting tag
+				frmt 	= markup[begin+1:end]
+				print('frmt: \'%s\'' % frmt)
+				close 	= end + 1 + markup[end+1:].index('</>') # Skip formatting tag when looking for closing tag (unnecessary optimization (?))
+				text 	= markup[end+1:close]					# Extract text between formatting tag and end tag
+				print('text: \'%s\'' % text)
+				markup  = markup[close+len('</>'):] # Increment the pointer (so to speak)
+
+				# TODO: Use takeWhile or regex (?)
+				#fg = Colours.WHITE if 'fg=' not in frmt else getattr(Colours, frmt[]) # TODO: Allow hex colours too (?)
+				#bg = Colours.BLACK if 'bg=' not in frmt else getattr(Colours, frmt[frmt.index('bg=')+3:(frmt[frmt.index('bg=')+3:].index())])
+				fg  = colour('fg', frmt)
+				bg  = colour('bg', frmt)
+
+				tokens.append(Token(fg, bg, text))
+			elif '<' in markup:
+				# Token does not have tags
+				end = markup.index('<')
+				tokens.append(Token(Colours.WHITE, Colours.BLACK, markup[:end]))
+				markup = markup[end:]
+			else:
+				# End of string and token does not have tags
+				tokens.append(Token(Colours.WHITE, Colours.BLACK, markup))
+				markup = ''
+
+		return tokens
+		#return '<fg=#FC bg=GREEN>Hello there</>This is white text. <fg=RED>IMPORTANT!</>'
+
+
+	def printMarkup(self, markup):
+		
+		''' '''
+
+		for token in self.parseMarkup(markup):
+			self.putColoured(char=token.text, fg=token.fg, bg=token.bg)
+
+		# TODO: Reset formatting afterwards (?)
+
+
 	def putColoured(self, char, fg=None, bg=None):
 		''' Prints a coloured string '''
+		# TODO: Rename char argument
 		stdout.flush()
 		self.colour(bg=bg, fg=fg)
 		print(char, end='')
@@ -242,9 +312,14 @@ def main():
 		'███████████████████████████████'
 	]
 
+	blocks = {
+	 '█': Colours.GREY,
+	 ' ': Colours.GREEN
+	}
+
 	for line in maze:
 		for tile in line:
-			colour = Colours.GREEN if (tile == ' ') else Colours.GREY
+			colour = blocks[tile]
 			console.putColoured(tile, fg=colour, bg=colour)
 		print()
 
@@ -266,8 +341,12 @@ def main():
 
 	console.cursor(3, 5)
 
-	# Printing affects cursor position
-	# Console should take that into account
+
+	#==============================================================================================================
+	# Negotiating the maze
+	#==============================================================================================================
+	# NOTE: Printing affects cursor position
+	# TODO: Console should take that into account
 	for X, Y in down(6) + right(8) + up(7) + right(6) + down(4) + right(8) + down(6) + left(6) + down(3) + left(8):
 		break
 		console.cursor(X+console.pos[0], Y+console.pos[1])
@@ -276,6 +355,10 @@ def main():
 		console.cursor(console.pos[0], console.pos[1])
 		print(' ')
 
+
+	#==============================================================================================================
+	# Rotating bar
+	#==============================================================================================================
 	for f in range(10):
 		break
 		console.cursor(5,5)
@@ -286,6 +369,10 @@ def main():
 		print('|/-\\|/-\\'[f%8])
 		sleep(1/8)
 
+
+	#==============================================================================================================
+	# Animating coloured squares
+	#==============================================================================================================
 	for f, p, c in zip(range(100), cycle([(5,5), (6,5), (6,6), (5,6)]), cycle([Colours.YELLOW, Colours.PURPLE, Colours.GOLD, Colours.BLOOD])):
 		break
 		console.cursor(*p)
@@ -306,13 +393,23 @@ def main():
 
 	console.cursor(0,20)
 
+
+	#==============================================================================================================
+	# Markup test
+	#==============================================================================================================
+	console.printMarkup('<fg=RED bg=YELLOW>Hello there! </>This is white text. <fg=RED>IMPORTANT!</>')
+
+
+	#==============================================================================================================
+	# EVENTS
+	#==============================================================================================================
 	app = tk.Tk()
 	app.bind('<Left>', 	lambda e: [console.moveCursor(-1, 0), console.putColoured(' ', bg=Colours.GRASS)])
 	app.bind('<Right>', lambda e: [console.moveCursor(1, 0), console.putColoured(' ', bg=Colours.GRASS)])
 	app.bind('<Up>', 	lambda e: [console.moveCursor(0, -1), console.putColoured(' ', bg=Colours.GRASS)])
 	app.bind('<Down>', 	lambda e: [console.moveCursor(0, 1), console.putColoured(' ', bg=Colours.GRASS)])
 	app.bind('<space>', lambda e: console.putColoured(' ', bg=choice([Colours.RED, Colours.GOLD, Colours.LAGOON])))
-	app.mainloop()	
+	app.mainloop()
 
 
 if __name__ == '__main__':
