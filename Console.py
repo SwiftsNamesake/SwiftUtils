@@ -108,9 +108,11 @@ class Console():
 
 		''' Sets or retrieves the cursor position '''
 
+		self.updateBufferInfo()
+		#stdout.flush()
+		
 		if x is None and y is None:
 			# TODO: Make sure self.pos is up to date (cf. print)
-			self.updateBufferInfo()
 			return self.pos
 
 		if x is not None:
@@ -119,7 +121,7 @@ class Console():
 		if y is not None:
 			self.pos = self.pos[0], y
 
-		windll.Kernel32.SetConsoleCursorPosition(self.hStdout, COORD(x,y))
+		windll.Kernel32.SetConsoleCursorPosition(self.hStdout, COORD(*self.pos))
 
 
 	def charAt(self, X, Y, char=None, bg=None, fg=None):
@@ -218,20 +220,19 @@ class Console():
 				return { 'fg': Colours.WHITE, 'bg': Colours.BLACK }[prop]
 			else:
 				# TODO: Use colour aliases when printing tokens (?)
+				# TODO: More attributes
 				return getattr(Colours, ''.join(takewhile(lambda c: c.isupper(), frmt[frmt.index(prop)+3:])))
 		
 
 		while len(markup) > 0:
-			print(len(markup))
-			print('Markup: \'%s\'' % markup)
 			if markup.startswith('<'):
 				begin 	= markup.index('<') # Should always be 0 within this branch
 				end 	= markup.index('>') # Last index of formatting tag
 				frmt 	= markup[begin+1:end]
-				print('frmt: \'%s\'' % frmt)
+
 				close 	= end + 1 + markup[end+1:].index('</>') # Skip formatting tag when looking for closing tag (unnecessary optimization (?))
 				text 	= markup[end+1:close]					# Extract text between formatting tag and end tag
-				print('text: \'%s\'' % text)
+
 				markup  = markup[close+len('</>'):] # Increment the pointer (so to speak)
 
 				# TODO: Use takeWhile or regex (?)
@@ -241,15 +242,11 @@ class Console():
 				bg  = colour('bg', frmt)
 
 				tokens.append(Token(fg, bg, text))
-			elif '<' in markup:
+			else:
 				# Token does not have tags
-				end = markup.index('<')
+				end = markup.index('<') if '<' in markup else len(markup)
 				tokens.append(Token(Colours.WHITE, Colours.BLACK, markup[:end]))
 				markup = markup[end:]
-			else:
-				# End of string and token does not have tags
-				tokens.append(Token(Colours.WHITE, Colours.BLACK, markup))
-				markup = ''
 
 		return tokens
 		#return '<fg=#FC bg=GREEN>Hello there</>This is white text. <fg=RED>IMPORTANT!</>'
