@@ -53,7 +53,7 @@ def India():
 	saffron = (255, 153, 51)
 	green 	= (18, 136, 7)
 
-	print(white, saffron,green)
+	print(white, saffron, green)
 	img 	= Image.new('RGB', size, white)
 	pixels 	= img.load()
 

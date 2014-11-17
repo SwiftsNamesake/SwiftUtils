@@ -23,6 +23,15 @@
 # 																	 	 	  #
 # DESCRIPTION: Pretty prints a dictionary								 	  #
 #=============================================================================#
+
+
+
+# from functools import wraps
+from inspect import getouterframes, currentframe
+from SwiftUtils.Console import Console
+
+
+
 def prettyDict(dictionary, delimit=True, heading=''):
 	
 	''' Pretty prints a dictionary with an optional heading and delimiter '''
@@ -324,7 +333,7 @@ def vennCircles(centre : complex, size : complex, number : int, distance : int, 
 	corners = [ centre+size+rect(distance, angle*π/180.0) for angle in range(0, 360, dAngle)]	# List of Veen circle top left corner coordinates
 
 	if show:
-		print('\n\n'.join('top: %d%s;\nleft: %d%s;' % (corner.imag, unit, corner.real, unit)  for corner in corners))
+		print('\n\n'.join('top: %d%s;\nleft: %d%s;' % (corner.imag, unit, corner.real, unit) for corner in corners))
 
 	return corners
 
@@ -361,6 +370,61 @@ def extractTODOs(fnFrom, fnTo, token='# TODO: ', header=True, append=False, end=
 				to.write(callback(N, ln.strip().replace(token, '') + end))
 		
 		to.write(end) # Add newline
+
+
+
+# Decorators
+# def addLogger(class, variable, messages):
+def addLogger(cls):
+
+	''' Creates a logging function '''
+
+	# NOTE: Adapted from similar function in Hangman utilities
+
+	# TODO: Allow for some flexibility
+	# TODO: Make it a decorator (?)
+	# TODO: Good idea to use inheritance (?)
+
+	# @wraps(cls)
+	class Wrapper(cls):
+
+		def __init__(self, *args, **kwargs):
+			self.DEBUG = False
+			self.con = Console()
+			self.messages = [] # TODO: Prevent name clashes
+			super(*args, **kwargs).__init__(*args, **kwargs)
+
+		def log(self, *messages, kind='normal', identify=True, **kwargs):
+			
+			'''
+			Prints any number of messages, with optional context (class name, line number)
+
+			'''
+
+			# TODO: Document kinds, rename (eg. log, debug, error, warning) (?)
+			# TODO: Make instance-setting (✓)
+			# TODO: Different categories (eg. error, log, feedback)
+			# TODO: Adding attributes to object via class
+
+			colour = {
+				'normal': 'WHITE',
+				'warning': 'YELLOW',
+				'error': 'RED'
+			}[kind]
+
+			if not hasattr(self, 'DEBUG'):
+				self.DEBUG = False
+
+			if self.DEBUG:
+				self.con.printMarkup('(<fg={FG}>{kind}</>) '.format(FG=colour, kind=kind) if kind != 'normal' else '')
+				print('(%s) [%s] ' % (cls.__name__, getouterframes(currentframe())[1][2]) if identify else '', end='')
+				print(*messages, **kwargs)
+
+			# TODO: Store all messages (?)
+			self.messages += messages
+
+	return Wrapper
+
 
 
 # Test suite

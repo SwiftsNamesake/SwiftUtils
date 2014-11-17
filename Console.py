@@ -12,6 +12,7 @@
 #		 - Proper Unicode handling, encoding queries
 #		 - Saving output
 #		 - Sort methods in a logical order (High-level API, Low-level API, internal methods, auxiliary internal methods, etc.)
+#		 - Position printing (printAt, fill, etc.)
 
 # SPEC | - 
 #		 -
@@ -79,7 +80,7 @@ class Console():
 		self.fg = 0x00 # Lowest bits indicate fg?
 
 		# Initialize buffer attributes
-		# TODO: Cursor object (eg. pos, visible, etc) (?)
+		# TODO: Cursor object (eg. pos, visible, etc.) (?)
 		self.size 	= None # Buffer size (in characters)
 		self.pos 	= 0, 0 # Cursor position (character offset from top left corner)
 
@@ -109,7 +110,8 @@ class Console():
 		''' Sets or retrieves the cursor position '''
 
 		self.updateBufferInfo()
-		#stdout.flush()
+		stdout.flush()
+		#print('X: %d\n%sY: %d' % (self.pos[0], ' ' * (self.pos[0]), self.pos[1]))
 		
 		if x is None and y is None:
 			# TODO: Make sure self.pos is up to date (cf. print)
@@ -149,7 +151,8 @@ class Console():
 		info = BUFFERINFO()
 		windll.Kernel32.GetConsoleScreenBufferInfo(self.hStdout, byref(info)) # TODO: Make sure this is correct
 		
-		self.pos 	= info.dwCursorPosition.X, info.dwCursorPosition.Y
+		self.pos 	= (info.dwCursorPosition.X, info.dwCursorPosition.Y)
+		assert self.pos == (info.dwCursorPosition.X, info.dwCursorPosition.Y)
 		self.size 	= info.dwSize.X, info.dwSize.Y
 
 
@@ -209,21 +212,35 @@ class Console():
 		# TODO: Escapes for syntactic characters
 		# TODO: Default formatting for plain text
 		# TODO: Debugging, error handling
+		# TODO: Optimise, extract setup code (eg. definitions)
 		# TODO: Use regex or library (?)
 		# NOTE: Nested tags are currently not supported
 		
 		Token = namedtuple('Token', 'fg bg text')
 		tokens = []
 
+		# Default values for attributes
+		defaults = {
+			'fg': 'WHITE',
+			'bg': 'BLACK'
+		}
+
 		def colour(prop, frmt):
+			''' '''
+			# TODO: Find a more general name (eg. parseAttributes)
+			# TODO: Allow customisation via kwargs (?)
 			if prop not in frmt:
-				return { 'fg': Colours.WHITE, 'bg': Colours.BLACK }[prop]
+				return defaults[prop]
 			else:
 				# TODO: Use colour aliases when printing tokens (?)
-				# TODO: More attributes
-				return getattr(Colours, ''.join(takewhile(lambda c: c.isupper(), frmt[frmt.index(prop)+3:])))
-		
+				# TODO: More attributes (...)
+				# This sub-parser only consumes upper-case letters (since it's trying to extract a Colour constant)
+				#return getattr(Colours, ''.join(takewhile(lambda c: c.isupper(), frmt[frmt.index(prop)+3:])))
+				# This generalised sub-parser extracts ANY value token and leaves the interpretation to the caller
+				# NOTE: Assumes the delimiter is a space. Easily customised.
+				return ''.join(takewhile(lambda c: c not in ' >', frmt[frmt.index(prop)+3:]))
 
+		
 		while len(markup) > 0:
 			if markup.startswith('<'):
 				begin 	= markup.index('<') # Should always be 0 within this branch
@@ -240,12 +257,11 @@ class Console():
 				#bg = Colours.BLACK if 'bg=' not in frmt else getattr(Colours, frmt[frmt.index('bg=')+3:(frmt[frmt.index('bg=')+3:].index())])
 				fg  = colour('fg', frmt)
 				bg  = colour('bg', frmt)
-
 				tokens.append(Token(fg, bg, text))
 			else:
 				# Token does not have tags
 				end = markup.index('<') if '<' in markup else len(markup)
-				tokens.append(Token(Colours.WHITE, Colours.BLACK, markup[:end]))
+				tokens.append(Token(defaults['fg'], defaults['bg'], markup[:end]))
 				markup = markup[end:]
 
 		return tokens
@@ -255,9 +271,9 @@ class Console():
 	def printMarkup(self, markup):
 		
 		''' '''
-
+		# NOTE: Currently incompatible with customised markup
 		for token in self.parseMarkup(markup):
-			self.putColoured(char=token.text, fg=token.fg, bg=token.bg)
+			self.putColoured(char=token.text, fg=getattr(Colours, token.fg), bg=getattr(Colours,token.bg))
 
 		# TODO: Reset formatting afterwards (?)
 
