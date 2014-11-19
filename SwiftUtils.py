@@ -426,6 +426,45 @@ def addLogger(cls):
 	return Wrapper
 
 
+class Logger(object):
+
+	'''
+	Docstring goes here
+
+	'''
+
+	def __init__(self):
+		
+		'''
+		Docstring goes here
+
+		'''
+
+		# TODO: Error, Warning, Success, etc.
+		self.console 	= Console()
+		self.DEBUG 		= True
+
+
+	def log(self, fr, message, kind):
+		
+		'''
+		Docstring goes here
+
+		'''
+
+		# TODO: Allow print key-word arguments
+		colour = {
+				'log': 'WHITE',
+				'warning': 'YELLOW',
+				'error': 'RED'
+		}[kind]
+
+
+		if self.DEBUG:
+			line = getouterframes(currentframe())[1][2]
+			self.con.printMarkup('(<fg={FG}>{kind}</>) ({fr}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, fr=fr, ln=line))
+
+
 
 # Test suite
 @entryPoint
