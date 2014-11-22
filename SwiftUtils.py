@@ -433,7 +433,7 @@ class Logger(object):
 
 	'''
 
-	def __init__(self):
+	def __init__(self, from):
 		
 		'''
 		Docstring goes here
@@ -445,7 +445,7 @@ class Logger(object):
 		self.DEBUG 		= True
 
 
-	def log(self, fr, message, kind):
+	def log(self, message, kind, **options):
 		
 		'''
 		Docstring goes here
@@ -460,9 +460,14 @@ class Logger(object):
 		}[kind]
 
 
-		if self.DEBUG:
+		if not self.DEBUG:
+			return
+
+		if options.get('identify', True):
 			line = getouterframes(currentframe())[1][2]
-			self.con.printMarkup('(<fg={FG}>{kind}</>) ({fr}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, fr=fr, ln=line))
+			self.console.printMarkup('(<fg={FG}>{kind}</>) ({fr}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, fr=fr, ln=line))
+		else:
+			self.console.printMarkup(message)
 
 
 

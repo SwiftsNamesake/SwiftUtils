@@ -131,14 +131,7 @@ class EventDispatcher:
 		# self.DEBUG(match)
 		# NOTE: all([]) is True
 		pressed = [pygame.key.get_pressed()[key] for key in pattern.also]
-		if event.type == MOUSEMOTION:
-			# print(pygame.key.get_pressed())
-			issub = pattern.attributes.issubset(match)
-			print(pattern.also)
-			print(all(pressed))
-			print(issub)
-			print()
-			return issub and all(pressed)
+
 		return pattern.attributes.issubset(match) and all(pressed)
 
 
