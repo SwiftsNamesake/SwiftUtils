@@ -447,7 +447,7 @@ class Logger(object):
 		self.who = who
 
 
-	def log(self, message, kind, **options):
+	def log(self, message, kind='log', end='\n', **options):
 		
 		'''
 		Docstring goes here
@@ -470,6 +470,8 @@ class Logger(object):
 			self.console.printMarkup('(<fg={FG}>{kind}</>) ({who}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, who=self.who, ln=line))
 		else:
 			self.console.printMarkup(message)
+
+		print(end=end)
 
 
 
