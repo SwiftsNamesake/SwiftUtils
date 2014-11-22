@@ -433,7 +433,7 @@ class Logger(object):
 
 	'''
 
-	def __init__(self, from):
+	def __init__(self, who):
 		
 		'''
 		Docstring goes here
@@ -443,6 +443,8 @@ class Logger(object):
 		# TODO: Error, Warning, Success, etc.
 		self.console 	= Console()
 		self.DEBUG 		= True
+
+		self.who = who
 
 
 	def log(self, message, kind, **options):
@@ -465,7 +467,7 @@ class Logger(object):
 
 		if options.get('identify', True):
 			line = getouterframes(currentframe())[1][2]
-			self.console.printMarkup('(<fg={FG}>{kind}</>) ({fr}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, fr=fr, ln=line))
+			self.console.printMarkup('(<fg={FG}>{kind}</>) ({who}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, who=who, ln=line))
 		else:
 			self.console.printMarkup(message)
 
