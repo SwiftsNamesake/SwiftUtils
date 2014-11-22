@@ -467,7 +467,7 @@ class Logger(object):
 
 		if options.get('identify', True):
 			line = getouterframes(currentframe())[1][2]
-			self.console.printMarkup('(<fg={FG}>{kind}</>) ({who}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, who=who, ln=line))
+			self.console.printMarkup('(<fg={FG}>{kind}</>) ({who}) [{ln}] {msg}'.format(FG=colour, kind=kind, msg=message, who=self.who, ln=line))
 		else:
 			self.console.printMarkup(message)
 
