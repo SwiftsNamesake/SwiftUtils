@@ -24,9 +24,9 @@ class MultiSwitch(object):
 
 	def __init__(self, mapping):
 		self.mapping = self.unpack(mapping)
-		self.__getitem__ = self.mapping.__getitem__
-		self.__setitem__ = self.mapping.__setitem__
-		self.__delitem__ = self.mapping.__delitem__
+		# self.__getitem__ = self.mapping.__getitem__
+		# self.__setitem__ = self.mapping.__setitem__
+		# self.__delitem__ = self.mapping.__delitem__
 
 
 	def unpack(self, mapping):
@@ -41,6 +41,11 @@ class MultiSwitch(object):
 			for key in keys:
 				unpacked[key] = value
 		return unpacked
+
+
+	def get(self, key, default):
+		return self.mapping.get(key, default)
+
 
 	def __getitem__(self, key): return self.mapping[key]
 	def __delitem__(self, key): del self.mapping[key]
