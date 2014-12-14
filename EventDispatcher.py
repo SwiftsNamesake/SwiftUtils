@@ -47,7 +47,7 @@ class EventDispatcher:
 
 		def __init__(self, attributes):
 			self.also = attributes.pop('also', tuple()) # Keys that must be pressed to for the pattern to match
-			self.doc  = attributes.pop('doc', tuple())
+			self.doc  = attributes.pop('doc', '')
 			self.attributes = frozenset(attributes.items())
 
 
@@ -97,8 +97,8 @@ class EventDispatcher:
 
 		'''
 
-		for handler in self.query(event): #getattr(self, event.type)
-			handler(event)
+		for pattern, handler in self.query(event): #getattr(self, event.type)
+			handler(pattern, event)
 			self.DEBUG('Invalid handler type')
 
 
@@ -115,7 +115,7 @@ class EventDispatcher:
 		# TODO: Complete overview of event types and related data
 
 		# TODO: Optionally return mapping between matching patterns and their corresponding handlers (?)
-		return (handler for pattern, handlers in self.handlers[event.type].items() for handler in handlers if self.matches(pattern, event))
+		return (pattern, handler for pattern, handlers in self.handlers[event.type].items() for handler in handlers if self.matches(pattern, event))
 
 
 	def matches(self, pattern, event):
