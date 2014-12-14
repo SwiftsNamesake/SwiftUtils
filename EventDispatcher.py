@@ -115,7 +115,7 @@ class EventDispatcher:
 		# TODO: Complete overview of event types and related data
 
 		# TODO: Optionally return mapping between matching patterns and their corresponding handlers (?)
-		return (pattern, handler for pattern, handlers in self.handlers[event.type].items() for handler in handlers if self.matches(pattern, event))
+		return ((pattern, handler) for pattern, handlers in self.handlers[event.type].items() for handler in handlers if self.matches(pattern, event))
 
 
 	def matches(self, pattern, event):
