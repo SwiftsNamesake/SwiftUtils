@@ -46,7 +46,8 @@ class EventDispatcher:
 		''' Docstring goes here '''
 
 		def __init__(self, attributes):
-			self.also = attributes.pop('also', tuple())
+			self.also = attributes.pop('also', tuple()) # Keys that must be pressed to for the pattern to match
+			self.doc  = attributes.pop('doc', tuple())
 			self.attributes = frozenset(attributes.items())
 
 

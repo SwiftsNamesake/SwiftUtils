@@ -6,7 +6,7 @@
 # date
 #
 
-# TODO | -
+# TODO | - Simplify implementation by inheriting from userDict and overriding __init__ or __new__ (?)
 #        -
 #
 # SPEC | -
@@ -34,6 +34,7 @@ class MultiSwitch(object):
 		'''
 		Unpacks the initial compacted mapping into
 		a conventional dictionary for easy access.
+
 		'''
 
 		unpacked = {}
