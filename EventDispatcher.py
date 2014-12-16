@@ -172,8 +172,8 @@ class EventDispatcher:
 		'''
 
 		self.clock = pygame.time.Clock()
-		self.bind({'type': QUIT}, sys.exit)
-		self.bind({'type': KEYDOWN, 'key': K_ESCAPE}, sys.exit)
+		self.bind({'type': QUIT}, lambda p, e: sys.exit())
+		self.bind({'type': KEYDOWN, 'key': K_ESCAPE}, lambda p, e: sys.exit())
 
 		while True:
 			self.clock.tick(30)
