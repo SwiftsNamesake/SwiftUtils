@@ -22,8 +22,28 @@ class MultiSwitch(object):
 
 	'''
 
-	def __init__(self, mapping):
+	_cache = {} # Ugh, underscore
+
+
+	def __new__(MSwitch, mapping, mnemonic=None):
+
+		'''
+		Retrieves switch from the cache if it already exists
+
+		'''
+
+		if mnemonic in MSwitch._cache:
+			return MSwitch._cache[mnemonic]
+		else:
+			# TODO: Safe to rely on id (?)
+			switch = super(MultiSwitch, MSwitch).__new__(MSwitch)
+			MSwitch._cache[mnemonic or id(switch)] = switch # Relies on logic short-circuiting
+			return switch
+
+
+	def __init__(self, mapping, mnemonic=None):
 		self.mapping = self.unpack(mapping)
+		self.mnemonic = mnemonic
 		# self.__getitem__ = self.mapping.__getitem__
 		# self.__setitem__ = self.mapping.__setitem__
 		# self.__delitem__ = self.mapping.__delitem__
